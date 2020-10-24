@@ -1,7 +1,10 @@
 const exprss = require('express')
-const router = exprss.Router()
 const mongoose = require('mongoose')
 const bcrypt = require('bcryptjs')
+const jwt = require('jsonwebtoken')
+const {} = require('../keys')
+
+const router = exprss.Router()
 const User = mongoose.model("User")
 
 router.post("/signup", (req,res) => {
@@ -37,5 +40,23 @@ router.post("/signup", (req,res) => {
 
 router.post("/signin",(req, res ) => {
     const {email, password} = req.body
+    if(!email || !password) {
+        return res.status(422).json({error:"please enter the details"})
+     }
+     User.findOne({email:email})
+     .then(savedUser => {  
+         if(!savedUser) {
+            return res.status(422).json({error:"invalid email or password"})
+         }
+         bcrypt.compare(password, savedUser.password)
+         .then(doMatch => {
+             if(doMatch) {
+                //res.json({message:"Successfuly logedin"})
+
+             } else {
+                res.status(422).json({error:"invalid email or password"})
+             }
+         })
+     }) 
 })
 module.exports = router
